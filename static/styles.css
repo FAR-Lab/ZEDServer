@@ -1,0 +1,35 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 800px;
+}
+
+
+#svoList {
+    padding-left: 0;
+    list-style: none;
+}
+
+#svoList .list-group-item {
+    background-color: #fff;
+    border-radius: 0.25rem;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#svoList .btn {
+    margin: 0 5px;
+}
+
+@keyframes blinkingEffect {
+    50% {
+        opacity: 0;
+      }
+}
+
+.blinking {
+    animation: blinkingEffect 1s linear infinite;
+}
+

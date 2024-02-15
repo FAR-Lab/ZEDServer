@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.4.0/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <title>FARLab ZED Control Interface</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var showAlerts = false;
+        function refreshSVOList() {
+            $.get("/list_svo_files", function (data) {
+                if (data.status === 'success') {
+                    $('#svoList').empty();
+                    data.files.forEach(function (file) {
+                        var listItem = $('<li class="list-group-item d-flex justify-content-between align-items-center">').text(file);
+                        var buttons = $('<div>');
+                        var deleteButton = $('<button class="btn btn-danger btn-sm ml-2">').text('Delete').click(function () { deleteSVO(file); });
+                        var downloadButton = $('<button class="btn btn-primary btn-sm ml-2">').text('Download').click(function () { downloadSVO(file); });
+                        buttons.append(deleteButton);
+                        buttons.append(downloadButton);
+                        listItem.append(buttons);
+                        $('#svoList').append(listItem);
+                    });
+                } else {
+                    showAlert("Failed to fetch SVO files: " + data.message);
+                }
+            });
+        }
+
+        function deleteSVO(filename) {
+            $.post("/delete_svo/" + filename, {}, function (data) {
+                showAlert("Status: " + data.status + "\nMessage: " + data.message);
+                refreshSVOList();
+            });
+        }
+
+        function downloadSVO(filename) {
+            window.location.href = "/download_svo/" + filename;
+        }
+
+        function showAlert(message) {
+            if (showAlerts) {
+                alert(message);
+            }
+        }
+
+        $(document).ready(function () {
+            refreshSVOList();
+
+            $("#startBtn").click(function () {
+                $.get("/start", function (data, status) {
+                    showAlert("Status: " + data.status + "\nMessage: " + data.message);
+                    if (data.status === 'success') {
+                        $("#recordingIcon").show();
+                    }
+                });
+            });
+
+            $("#stopBtn").click(function () {
+                $.get("/stop", function (data, status) {
+                    showAlert("Status: " + data.status + "\nMessage: " + data.message);
+                    if (data.status === 'success') {
+                        $("#recordingIcon").hide();
+                    }
+                    refreshSVOList();
+                });
+            });
+
+            $("#refreshBtn").click(function () {
+                refreshSVOList();
+            });
+
+            $("#toggleAlerts").change(function() {
+                showAlerts = this.checked;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>FARLab ZED Control Interface</h1>
+        <input type="checkbox" id="toggleAlerts"> Show Debug Alerts
+        <div class="mt-3 mb-3">
+            <button id="startBtn" class="btn btn-success">Start Recording</button>
+            <button id="stopBtn" class="btn btn-danger">Stop Recording</button>
+            <button id="refreshBtn" class="btn btn-primary">Refresh List</button>
+            <span id="recordingIcon" class="bi bi-record-circle blinking" style="color: red; display: none;"></span>
+        </div>
+        <ul id="svoList" class="list-group"></ul>
+    </div>
+</body>
+</html>
