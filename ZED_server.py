@@ -69,8 +69,7 @@ def stop():
 def list_svo_files():
     try:
         files = [f for f in os.listdir(absolute_output_directory_path) if f.endswith('.svo')]
-        #for file in files:
-            #print(file)
+        files.sort(reverse=True)
         return jsonify({'status': 'success', 'files': files}), 200
     except Exception as e:
         print(e)
